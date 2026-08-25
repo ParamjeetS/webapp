@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All-in-One Photo Sketch & Studio Suite</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card-bg: #181b24;
+      --panel-bg: #212532;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-soft: rgba(59, 130, 246, 0.15);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --border: #2e3446;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --success: #10b981;
+      --success-hover: #059669;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1150px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    header {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+    h2 {
+      margin: 0 0 6px 0;
+      font-size: 1.6rem;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-btn:hover {
+      color: var(--text);
+      border-color: #4b5563;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Layout & Controls */
+    .studio-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .studio-layout { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      padding: 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .url-group {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+    .url-group input[type="url"], input[type="text"] {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      color: #fff;
+      font-size: 0.85rem;
+    }
+
+    .controls-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    input[type="range"] {
+      accent-color: var(--accent);
+      background: var(--bg);
+      height: 6px;
+      border-radius: 3px;
+      width: 100%;
+    }
+    select, input[type="color"] {
+      background: var(--bg);
+      color: #fff;
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      width: 100%;
+      font-size: 0.85rem;
+    }
+    input[type="color"] {
+      height: 38px;
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    /* Buttons */
+    button, .file-label {
+      padding: 9px 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-align: center;
+      transition: background 0.2s ease, opacity 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    button:hover, .file-label:hover { background: var(--accent-hover); }
+    button:disabled, button:disabled:hover {
+      background: #2a2e3d;
+      color: #64748b;
+      cursor: not-allowed;
+      opacity: 0.7;
+      box-shadow: none;
+    }
+    
+    .btn-snap { background: var(--success); }
+    .btn-snap:hover { background: var(--success-hover); }
+    .btn-danger { background: var(--danger); }
+    .btn-danger:hover { background: var(--danger-hover); }
+    .btn-sec { background: #374151; color: var(--text); }
+    .btn-sec:hover { background: #4b5563; }
+    .btn-mic { background: #8b5cf6; }
+    .btn-mic:hover { background: #7c3aed; }
+    .btn-mic.recording { background: #ef4444; animation: pulse 1.5s infinite; }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    input[type="file"] { display: none; }
+    video { display: none; }
+
+    /* Canvas Viewport */
+    .viewport {
+      background: var(--bg);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-md);
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 16px;
+    }
+    .viewport-empty {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    canvas {
+      max-width: 100%;
+      max-height: 70vh;
+      height: auto;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      display: none;
+    }
+    #overlayCanvas {
+      cursor: grab;
+    }
+    #overlayCanvas:active {
+      cursor: grabbing;
+    }
+
+    /* List Managers */
+    .image-list-wrapper { width: 100%; margin-top: 6px; }
+    .image-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      background: var(--bg);
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .image-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--panel-bg);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .image-item-info { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+    .image-item img { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; }
+    .image-item-actions { display: flex; gap: 4px; }
+    .image-item-actions button { padding: 4px 8px; font-size: 0.75rem; }
+
+    /* Overlay Card Item */
+    .overlay-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.2s ease;
+    }
+    .overlay-card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    /* Progress Bar */
+    .progress-box { width: 100%; max-width: 500px; margin: 15px auto 0 auto; display: none; }
+    .progress-bar-bg { width: 100%; height: 10px; background: var(--bg); border-radius: 5px; overflow: hidden; border: 1px solid var(--border); }
+    .progress-bar-fill { width: 0%; height: 100%; background: var(--accent); transition: width 0.1s ease; }
+    .status-text { text-align: center; margin-top: 8px; font-size: 0.85rem; color: var(--text-muted); }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .checkbox-label input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h2>Photo Sketch & Media Studio</h2>
+      <p class="subtitle">Transform images, overlay graphics & text, join pictures, and render animations.</p>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('sketchTab', event)">🎨 Pencil & Art Converter</button>
+      <button class="tab-btn" onclick="switchTab('overlayTab', event)">🖼️ Image & Text Overlay</button>
+      <button class="tab-btn" onclick="switchTab('joinerTab', event)">🖼️ Multi-Picture Joiner</button>
+      <button class="tab-btn" onclick="switchTab('gifTab', event)">🎞️ Picture to GIF</button>
+    </div>
+
+    <!-- TAB 1: SKETCH & ART STUDIO -->
+    <div id="sketchTab" class="tab-content active">
+      <div class="studio-layout">
+        <div class="panel">
+          <label class="file-label" for="sketchUpload">📁 Upload Image</label>
+          <input type="file" id="sketchUpload" accept="image/png, image/jpeg, image/webp, image/gif">
+
+          <div class="url-group">
+            <input type="url" id="sketchUrl" placeholder="Image URL...">
+            <button id="loadUrlBtn">Load</button>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button id="startCamBtn" style="flex:1;">📹 Webcam</button>
+            <button id="snapCamBtn" class="btn-snap" style="display:none; flex:1;">📸 Snap</button>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border); margin: 4px 0;">
+
+          <div class="controls-grid">
+            <div class="control-group">
+              <div class="control-header"><label for="artStyle">Art Style</label></div>
+              <select id="artStyle">
+                <option value="0">Detailed Graphite</option>
+                <option value="1">Color Pencil</option>
+                <option value="2">Charcoal (Inverted)</option>
+                <option value="3">Halftone Comic</option>
+                <option value="4">Ink Outline</option>
+                <option value="5">Watercolor Wash</option>
+                <option value="6">Sepia Vintage</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <div class="control-header"><label for="sharpness">Edge Detail</label><span id="sharpVal">2.0</span></div>
+              <input type="range" id="sharpness" min="0.5" max="5.0" step="0.1" value="2.0">
+            </div>
+            <div class="control-group">
+              <div class="control-header"><label for="contrast">Contrast Boost</label><span id="contrastVal">1.2</span></div>
+              <input type="range" id="contrast" min="0.5" max="3.0" step="0.1" value="1.2">
+            </div>
+            <div class="control-group">
+              <div class="control-header"><label for="blur">Pencil Softness</label><span id="blurVal">2.0</span></div>
+              <input type="range" id="blur" min="0.5" max="6.0" step="0.5" value="2.0">
+            </div>
+            <div class="control-group">
+              <div class="control-header"><label for="shadows">Shading Depth</label><span id="shadowVal">1.3</span></div>
+              <input type="range" id="shadows" min="0.5" max="3.0" step="0.1" value="1.3">
+            </div>
+            <div class="control-group">
+              <div class="control-header"><label for="paperTex">Paper Texture</label><span id="paperVal">0.10</span></div>
+              <input type="range" id="paperTex" min="0.0" max="0.5" step="0.05" value="0.10">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-top: 6px;">
+            <button id="resetSketchBtn" class="btn-sec" style="flex:1;">🔄 Reset Controls</button>
+            <button id="downloadSketch" disabled style="flex:1;">💾 Save Sketch</button>
+          </div>
+        </div>
+
+        <div class="viewport">
+          <div id="sketchEmptyState" class="viewport-empty">Upload an image or start the webcam to preview art styles</div>
+          <video id="webcam" autoplay playsinline muted></video>
+          <canvas id="glCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: IMAGE & TEXT OVERLAY + SPEECH TO TEXT -->
+    <div id="overlayTab" class="tab-content">
+      <div class="studio-layout">
+        <div class="panel">
+          <label class="file-label" for="overlayBaseUpload">🖼️ Upload Base Image</label>
+          <input type="file" id="overlayBaseUpload" accept="image/png, image/jpeg, image/webp, image/gif">
+
+          <hr style="border: 0; border-top: 1px solid var(--border); margin: 2px 0;">
+
+          <!-- Image Overlays Section -->
+          <div class="control-group">
+            <div class="control-header"><label>Image Overlays / Watermarks</label></div>
+            <label class="file-label btn-sec" for="overlayImgUpload">➕ Add Overlay Image</label>
+            <input type="file" id="overlayImgUpload" accept="image/png, image/jpeg, image/webp, image/gif" multiple>
+          </div>
+
+          <div id="overlayImagesContainer" class="image-list-wrapper"></div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border); margin: 2px 0;">
+
+          <!-- Text Overlay Controls -->
+          <div class="control-group">
+            <div class="control-header"><label for="overlayText">Text Overlay</label></div>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="overlayText" placeholder="Type text or click speech mic...">
+              <button id="sttMicBtn" class="btn-mic" title="Click to speak">🎤 Mic</button>
+            </div>
+          </div>
+
+          <div class="controls-grid">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="control-group">
+                <div class="control-header"><label for="textColor">Text Color</label></div>
+                <input type="color" id="textColor" value="#ffffff">
+              </div>
+              <div class="control-group">
+                <div class="control-header"><label for="textPos">Position (Preset)</label></div>
+                <select id="textPos">
+                  <option value="custom">Custom (Drag Canvas)</option>
+                  <option value="bottom" selected>Bottom</option>
+                  <option value="top">Top</option>
+                  <option value="center">Center</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="control-header"><label for="fontSize">Font Size</label><span id="fontSizeVal">36px</span></div>
+              <input type="range" id="fontSize" min="16" max="120" step="2" value="36">
+            </div>
+
+            <label class="checkbox-label">
+              <input type="checkbox" id="textShadow" checked> Add Text Shadow / Glow
+            </label>
+
+            <label class="checkbox-label">
+              <input type="checkbox" id="textBanner"> Add Solid Dark Banner
+            </label>
+          </div>
+
+          <button id="downloadOverlay" disabled style="margin-top: 8px;">💾 Save Output Image</button>
+        </div>
+
+        <div class="viewport">
+          <div id="overlayEmptyState" class="viewport-empty">Upload a base image to start adding text and image overlays (Drag elements directly on canvas!)</div>
+          <canvas id="overlayCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: MULTI-PICTURE JOINER -->
+    <div id="joinerTab" class="tab-content">
+      <div class="studio-layout">
+        <div class="panel">
+          <label class="file-label" for="imgJoinUpload">➕ Add Images</label>
+          <input type="file" id="imgJoinUpload" accept="image/png, image/jpeg, image/webp, image/gif" multiple>
+
+          <div class="control-group">
+            <div class="control-header"><label for="joinMode">Layout Mode</label></div>
+            <select id="joinMode">
+              <option value="horizontal">Side-by-Side (Horizontal)</option>
+              <option value="vertical">Stacked (Vertical)</option>
+              <option value="grid">2-Column Grid</option>
+            </select>
+          </div>
+
+          <div class="image-list-wrapper">
+            <div id="imageList" class="image-list"></div>
+          </div>
+
+          <div style="display:flex; gap: 8px; margin-top: 8px;">
+            <button id="clearJoiner" class="btn-danger" style="flex:1;" disabled>🗑️ Clear All</button>
+            <button id="downloadJoin" style="flex:1;" disabled>💾 Save</button>
+          </div>
+        </div>
+
+        <div class="viewport">
+          <div id="joinerEmptyState" class="viewport-empty">Add multiple images to combine them into a single strip or grid</div>
+          <canvas id="joinerCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: HIGH-QUALITY PICTURE TO GIF -->
+    <div id="gifTab" class="tab-content">
+      <div class="studio-layout">
+        <div class="panel">
+          <label class="file-label" for="gifUpload">🎞️ Select Frames</label>
+          <input type="file" id="gifUpload" accept="image/png, image/jpeg, image/webp, image/gif" multiple>
+
+          <div class="controls-grid">
+            <div class="control-group">
+              <div class="control-header"><label for="gifDelay">Frame Delay (ms)</label><span id="delayVal">300</span></div>
+              <input type="range" id="gifDelay" min="100" max="1000" step="50" value="300">
+            </div>
+
+            <div class="control-group">
+              <div class="control-header"><label for="gifResize">Max Dimension</label></div>
+              <select id="gifResize">
+                <option value="600">600px (Fast Preview)</option>
+                <option value="800">800px (Standard)</option>
+                <option value="1200" selected>1200px (High Quality)</option>
+                <option value="1920">1920px (Full HD - Slower)</option>
+              </select>
+            </div>
+          </div>
+
+          <button id="createGif" disabled style="margin-top: 8px;">🎬 Generate GIF</button>
+        </div>
+
+        <div class="viewport" style="flex-direction: column;">
+          <div id="gifStatus" class="status-text">Select two or more image frames to compile a GIF animation.</div>
+          <div id="progressBox" class="progress-box">
+            <div class="progress-bar-bg">
+              <div id="progressFill" class="progress-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WebGL Shaders -->
+  <script id="vs" type="x-shader/x-vertex">
+    attribute vec2 a_position; attribute vec2 a_texCoord; varying vec2 v_texCoord;
+    void main() { gl_Position = vec4(a_position, 0.0, 1.0); v_texCoord = a_texCoord; }
+  </script>
+
+  <script id="fs" type="x-shader/x-fragment">
+    precision highp float;
+    varying vec2 v_texCoord;
+    uniform sampler2D u_image;
+    uniform vec2 u_texelSize;
+    uniform float u_blurRadius;
+    uniform float u_shadows;
+    uniform float u_paper;
+    uniform float u_sharpness;
+    uniform float u_contrast;
+    uniform int u_style;
+
+    float getLum(vec4 c) { return dot(c.rgb, vec3(0.299, 0.587, 0.114)); }
+    float paperNoise(vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453); }
+
+    float getSobelEdge(vec2 st) {
+      vec2 t = u_texelSize;
+      float tL = getLum(texture2D(u_image, st + vec2(-t.x,  t.y)));
+      float cL = getLum(texture2D(u_image, st + vec2(-t.x,  0.0)));
+      float bL = getLum(texture2D(u_image, st + vec2(-t.x, -t.y)));
+      float tR = getLum(texture2D(u_image, st + vec2( t.x,  t.y)));
+      float cR = getLum(texture2D(u_image, st + vec2( t.x,  0.0)));
+      float bR = getLum(texture2D(u_image, st + vec2( t.x, -t.y)));
+      float tM = getLum(texture2D(u_image, st + vec2( 0.0,  t.y)));
+      float bM = getLum(texture2D(u_image, st + vec2( 0.0, -t.y)));
+      float gx = -tL - 2.0*cL - bL + tR + 2.0*cR + bR;
+      float gy = -tL - 2.0*tM - tR + bL + 2.0*bM + bR;
+      return sqrt(gx*gx + gy*gy);
+    }
+
+    void main() {
+      vec2 st = v_texCoord;
+      vec4 rawColor = texture2D(u_image, st);
+      float baseGray = getLum(rawColor);
+      baseGray = clamp((baseGray - 0.5) * u_contrast + 0.5, 0.0, 1.0);
+
+      float blur = 0.0; float totalWeight = 0.0;
+      for (float x = -2.0; x <= 2.0; x += 1.0) {
+        for (float y = -2.0; y <= 2.0; y += 1.0) {
+          vec2 offset = vec2(x, y) * u_texelSize * u_blurRadius;
+          float sampleLum = getLum(texture2D(u_image, st + offset));
+          float weight = exp(-(x*x + y*y) / 4.0);
+          blur += (1.0 - sampleLum) * weight;
+          totalWeight += weight;
+        }
+      }
+      blur /= totalWeight;
+
+      float dodge = clamp(baseGray / max(1.0 - blur, 0.001), 0.0, 1.0);
+      float sketch = pow(dodge, u_shadows);
+      float edge = getSobelEdge(st) * u_sharpness;
+      sketch = clamp(sketch - edge, 0.0, 1.0);
+
+      float noise = (paperNoise(st * 600.0) - 0.5) * u_paper;
+      sketch = clamp(sketch + noise, 0.0, 1.0);
+
+      if (u_style == 0) gl_FragColor = vec4(vec3(sketch), 1.0);
+      else if (u_style == 1) gl_FragColor = vec4(mix(rawColor.rgb, vec3(sketch), 0.35) * sketch, 1.0);
+      else if (u_style == 2) gl_FragColor = vec4(vec3(1.0 - sketch), 1.0);
+      else if (u_style == 3) {
+        float pattern = sin(st.x * 250.0) * cos(st.y * 250.0);
+        gl_FragColor = vec4(vec3(step(pattern, sketch - 0.15)), 1.0);
+      } else if (u_style == 4) gl_FragColor = vec4(vec3(step(0.65, sketch)), 1.0);
+      else if (u_style == 5) gl_FragColor = vec4(mix(vec3(0.95, 0.92, 0.88), rawColor.rgb, sketch), 1.0);
+      else if (u_style == 6) gl_FragColor = vec4(vec3(sketch * 1.05, sketch * 0.88, sketch * 0.68), 1.0);
+    }
+  </script>
+
+  <script>
+    const MAX_FILE_SIZE = 15 * 1024 * 1024;
+    const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
+
+    function isValidImageFile(file) {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        alert(`Invalid file type for "${file.name}". Please upload a JPEG, PNG, WEBP, or GIF image.`);
+        return false;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        alert(`File "${file.name}" exceeds the 15MB size limit.`);
+        return false;
+      }
+      return true;
+    }
+
+    function switchTab(tabId, e) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      if (e && e.target) e.target.classList.add('active');
+    }
+
+    function escapeHtml(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // --- TAB 1: WEBGL SKETCH ENGINE ---
+    const glCanvas = document.getElementById('glCanvas');
+    const sketchEmptyState = document.getElementById('sketchEmptyState');
+    const video = document.getElementById('webcam');
+    const snapCamBtn = document.getElementById('snapCamBtn');
+    const downloadSketchBtn = document.getElementById('downloadSketch');
+    const resetSketchBtn = document.getElementById('resetSketchBtn');
+    const gl = glCanvas.getContext('webgl', { preserveDrawingBuffer: true });
+
+    if (!gl) {
+      alert('WebGL is not supported in your browser.');
+    }
+
+    function createShader(gl, type, src) {
+      const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s;
+    }
+    const program = gl.createProgram();
+    gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, document.getElementById('vs').text));
+    gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, document.getElementById('fs').text));
+    gl.linkProgram(program); gl.useProgram(program);
+
+    const posBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+    const posLoc = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(posLoc); gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const texBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, texBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0,1, 1,1, 0,0, 0,0, 1,1, 1,0]), gl.STATIC_DRAW);
+    const texLoc = gl.getAttribLocation(program, 'a_texCoord');
+    gl.enableVertexAttribArray(texLoc); gl.vertexAttribPointer(texLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const uTexelSize = gl.getUniformLocation(program, 'u_texelSize');
+    const uBlur = gl.getUniformLocation(program, 'u_blurRadius');
+    const uShadows = gl.getUniformLocation(program, 'u_shadows');
+    const uPaper = gl.getUniformLocation(program, 'u_paper');
+    const uSharpness = gl.getUniformLocation(program, 'u_sharpness');
+    const uContrast = gl.getUniformLocation(program, 'u_contrast');
+    const uStyle = gl.getUniformLocation(program, 'u_style');
+
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+    let activeSource = null, animationFrameId = null;
+
+    function stopWebcam() {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+      }
+    }
+
+    document.getElementById('sketchUpload').addEventListener('change', (e) => {
+      const file = e.target.files[0]; 
+      if (!file) return;
+      if (!isValidImageFile(file)) { e.target.value = ''; return; }
+      stopWebcam(); snapCamBtn.style.display = 'none';
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image(); 
+      img.onload = () => { loadImageSource(img); URL.revokeObjectURL(objectUrl); };
+      img.onerror = () => { alert('Failed to decode the image file.'); URL.revokeObjectURL(objectUrl); };
+      img.src = objectUrl;
+    });
+
+    document.getElementById('loadUrlBtn').addEventListener('click', () => {
+      const url = document.getElementById('sketchUrl').value.trim();
+      if (!url) return alert('Please enter an image URL');
+      try {
+        const parsedUrl = new URL(url);
+        if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+          return alert('Only HTTP and HTTPS image URLs are supported.');
+        }
+      } catch (_) {
+        return alert('Please enter a valid URL scheme (e.g., https://example.com/image.jpg)');
+      }
+      stopWebcam(); snapCamBtn.style.display = 'none';
+      const img = new Image(); img.crossOrigin = 'Anonymous';
+      img.onload = () => loadImageSource(img);
+      img.onerror = () => alert('Failed to load image URL. Verify CORS policy or link validity.');
+      img.src = url;
+    });
+
+    function loadImageSource(img) {
+      activeSource = 'image';
+      sketchEmptyState.style.display = 'none';
+      glCanvas.style.display = 'block';
+      glCanvas.width = img.width; glCanvas.height = img.height;
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      downloadSketchBtn.disabled = false;
+      drawSketch();
+    }
+
+    document.getElementById('startCamBtn').addEventListener('click', async () => {
+      try {
+        stopWebcam();
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+        video.srcObject = stream; await video.play();
+        video.onloadeddata = () => {
+          sketchEmptyState.style.display = 'none';
+          glCanvas.style.display = 'block';
+          glCanvas.width = video.videoWidth || 640; glCanvas.height = video.videoHeight || 480;
+          activeSource = 'video'; snapCamBtn.style.display = 'inline-flex';
+          downloadSketchBtn.disabled = false;
+          renderVideoLoop();
+        };
+      } catch (err) { alert('Webcam Error: ' + err.message); }
+    });
+
+    snapCamBtn.addEventListener('click', () => {
+      if (activeSource !== 'video') return;
+      const offscreen = document.createElement('canvas');
+      offscreen.width = video.videoWidth; offscreen.height = video.videoHeight;
+      offscreen.getContext('2d').drawImage(video, 0, 0);
+      stopWebcam(); snapCamBtn.style.display = 'none';
+      const img = new Image(); 
+      img.onload = () => loadImageSource(img);
+      img.src = offscreen.toDataURL('image/png');
+    });
+
+    function drawSketch() {
+      if (!glCanvas.width || !glCanvas.height) return;
+      gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+      gl.uniform2f(uTexelSize, 1.0 / glCanvas.width, 1.0 / glCanvas.height);
+      gl.uniform1f(uBlur, parseFloat(document.getElementById('blur').value));
+      gl.uniform1f(uShadows, parseFloat(document.getElementById('shadows').value));
+      gl.uniform1f(uPaper, parseFloat(document.getElementById('paperTex').value));
+      gl.uniform1f(uSharpness, parseFloat(document.getElementById('sharpness').value));
+      gl.uniform1f(uContrast, parseFloat(document.getElementById('contrast').value));
+      gl.uniform1i(uStyle, parseInt(document.getElementById('artStyle').value));
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+
+    function renderVideoLoop() {
+      if (activeSource === 'video' && !video.paused && !video.ended) {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+        drawSketch();
+        animationFrameId = requestAnimationFrame(renderVideoLoop);
+      }
+    }
+
+    resetSketchBtn.addEventListener('click', () => {
+      document.getElementById('artStyle').value = "0";
+      document.getElementById('sharpness').value = "2.0"; document.getElementById('sharpVal').textContent = "2.0";
+      document.getElementById('contrast').value = "1.2"; document.getElementById('contrastVal').textContent = "1.2";
+      document.getElementById('blur').value = "2.0"; document.getElementById('blurVal').textContent = "2.0";
+      document.getElementById('shadows').value = "1.3"; document.getElementById('shadowVal').textContent = "1.3";
+      document.getElementById('paperTex').value = "0.10"; document.getElementById('paperVal').textContent = "0.10";
+      if (activeSource === 'image') drawSketch();
+    });
+
+    ['blur', 'shadows', 'paperTex', 'sharpness', 'contrast', 'artStyle'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        if (id === 'blur') document.getElementById('blurVal').textContent = document.getElementById('blur').value;
+        if (id === 'shadows') document.getElementById('shadowVal').textContent = document.getElementById('shadows').value;
+        if (id === 'paperTex') document.getElementById('paperVal').textContent = document.getElementById('paperTex').value;
+        if (id === 'sharpness') document.getElementById('sharpVal').textContent = document.getElementById('sharpness').value;
+        if (id === 'contrast') document.getElementById('contrastVal').textContent = document.getElementById('contrast').value;
+        if (activeSource === 'image') drawSketch();
+      });
+    });
+
+    downloadSketchBtn.addEventListener('click', () => {
+      if (!glCanvas.width || glCanvas.style.display === 'none') return;
+      drawSketch();
+      const a = document.createElement('a'); a.download = 'sketch-art.png';
+      a.href = glCanvas.toDataURL('image/png'); a.click();
+    });
+
+    // --- TAB 2: IMAGE & TEXT OVERLAY + SPEECH TO TEXT & CANVAS DRAG ---
+    const overlayCanvas = document.getElementById('overlayCanvas');
+    const overlayEmptyState = document.getElementById('overlayEmptyState');
+    const oCtx = overlayCanvas.getContext('2d');
+    const downloadOverlayBtn = document.getElementById('downloadOverlay');
+    const sttMicBtn = document.getElementById('sttMicBtn');
+    const overlayImagesContainer = document.getElementById('overlayImagesContainer');
+    
+    let baseImage = null;
+    let overlayImages = []; // Array of overlay image objects
+    let textOverlayPos = { x: 50, y: 80 }; // Percentage positions for text
+    let selectedOverlayIndex = -1;
+    let isDragging = false;
+    let dragTarget = null; // 'text' or index of overlay image
+
+    // Load Base Image
+    document.getElementById('overlayBaseUpload').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file || !isValidImageFile(file)) return;
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        baseImage = img;
+        overlayCanvas.width = img.width;
+        overlayCanvas.height = img.height;
+        overlayEmptyState.style.display = 'none';
+        overlayCanvas.style.display = 'block';
+        downloadOverlayBtn.disabled = false;
+        renderOverlay();
+        URL.revokeObjectURL(objectUrl);
+      };
+      img.src = objectUrl;
+    });
+
+    // Load Overlay Images
+    document.getElementById('overlayImgUpload').addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+
+      files.forEach(file => {
+        if (!isValidImageFile(file)) return;
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          overlayImages.push({
+            id: Date.now() + Math.random(),
+            name: file.name,
+            img: img,
+            x: 50,          // percentage relative to base canvas width
+            y: 50,          // percentage relative to base canvas height
+            scale: 30,       // scale percentage relative to base width
+            opacity: 100,    // 0 to 100
+            rotation: 0      // degrees
+          });
+          selectedOverlayIndex = overlayImages.length - 1;
+          updateOverlayUI();
+          renderOverlay();
+        };
+        img.src = objectUrl;
+      });
+      e.target.value = '';
+    });
+
+    function updateOverlayUI() {
+      overlayImagesContainer.innerHTML = '';
+      if (!overlayImages.length) return;
+
+      overlayImages.forEach((item, idx) => {
+        const isSel = selectedOverlayIndex === idx;
+        const card = document.createElement('div');
+        card.className = `overlay-card ${isSel ? 'selected' : ''}`;
+        card.onclick = (e) => {
+          // Select when card is clicked unless clicking buttons/inputs
+          if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+            selectedOverlayIndex = idx;
+            updateOverlayUI();
+            renderOverlay();
+          }
+        };
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="image-item-info">
+              <img src="${item.img.src}" alt="thumb">
+              <strong style="font-size:0.8rem;">Overlay #${idx + 1}</strong>
+            </div>
+            <div class="image-item-actions">
+              <button class="btn-sec" onclick="moveOverlayItem(${idx}, -1); event.stopPropagation();">▲</button>
+              <button class="btn-sec" onclick="moveOverlayItem(${idx}, 1); event.stopPropagation();">▼</button>
+              <button class="btn-danger" onclick="removeOverlayItem(${idx}); event.stopPropagation();">✖</button>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:0.75rem;">
+            <div>
+              <label>Width Size (${Math.round(item.scale)}%)</label>
+              <input type="range" min="5" max="100" value="${item.scale}" oninput="updateOverlayProp(${idx}, 'scale', this.value)">
+            </div>
+            <div>
+              <label>Opacity (${Math.round(item.opacity)}%)</label>
+              <input type="range" min="10" max="100" value="${item.opacity}" oninput="updateOverlayProp(${idx}, 'opacity', this.value)">
+            </div>
+            <div>
+              <label>X Position (${Math.round(item.x)}%)</label>
+              <input type="range" min="0" max="100" value="${item.x}" oninput="updateOverlayProp(${idx}, 'x', this.value)">
+            </div>
+            <div>
+              <label>Y Position (${Math.round(item.y)}%)</label>
+              <input type="range" min="0" max="100" value="${item.y}" oninput="updateOverlayProp(${idx}, 'y', this.value)">
+            </div>
+          </div>
+        `;
+        overlayImagesContainer.appendChild(card);
+      });
+    }
+
+    function updateOverlayProp(idx, prop, val) {
+      if (overlayImages[idx]) {
+        overlayImages[idx][prop] = parseFloat(val);
+        renderOverlay();
+        const sliderLabel = document.querySelectorAll('.overlay-card')[idx]?.querySelectorAll('label');
+        if (sliderLabel) {
+          if (prop === 'scale') sliderLabel[0].textContent = `Width Size (${Math.round(val)}%)`;
+          if (prop === 'opacity') sliderLabel[1].textContent = `Opacity (${Math.round(val)}%)`;
+          if (prop === 'x') sliderLabel[2].textContent = `X Position (${Math.round(val)}%)`;
+          if (prop === 'y') sliderLabel[3].textContent = `Y Position (${Math.round(val)}%)`;
+        }
+      }
+    }
+
+    function moveOverlayItem(idx, dir) {
+      const target = idx + dir;
+      if (target < 0 || target >= overlayImages.length) return;
+      const temp = overlayImages[idx];
+      overlayImages[idx] = overlayImages[target];
+      overlayImages[target] = temp;
+      selectedOverlayIndex = target;
+      updateOverlayUI();
+      renderOverlay();
+    }
+
+    function removeOverlayItem(idx) {
+      overlayImages.splice(idx, 1);
+      if (selectedOverlayIndex >= overlayImages.length) {
+        selectedOverlayIndex = overlayImages.length - 1;
+      }
+      updateOverlayUI();
+      renderOverlay();
+    }
+
+    // --- CANVAS DRAG & DROP LOGIC ---
+    function getCanvasCoordinates(e) {
+      const rect = overlayCanvas.getBoundingClientRect();
+      const scaleX = overlayCanvas.width / rect.width;
+      const scaleY = overlayCanvas.height / rect.height;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+      };
+    }
+
+    function handlePointerDown(e) {
+      if (!baseImage) return;
+      const pt = getCanvasCoordinates(e);
+      const w = overlayCanvas.width;
+      const h = overlayCanvas.height;
+
+      // Check hit test on overlay images in reverse order (topmost first)
+      for (let i = overlayImages.length - 1; i >= 0; i--) {
+        const item = overlayImages[i];
+        const overlayWidth = (item.scale / 100) * w;
+        const overlayHeight = overlayWidth * (item.img.height / item.img.width);
+        const posX = (item.x / 100) * w - (overlayWidth / 2);
+        const posY = (item.y / 100) * h - (overlayHeight / 2);
+
+        if (pt.x >= posX && pt.x <= posX + overlayWidth && pt.y >= posY && pt.y <= posY + overlayHeight) {
+          isDragging = true;
+          dragTarget = i;
+          selectedOverlayIndex = i;
+          updateOverlayUI();
+          renderOverlay();
+          return;
+        }
+      }
+
+      // Check hit test on text overlay
+      const text = document.getElementById('overlayText').value.trim();
+      if (text) {
+        const fontSize = parseInt(document.getElementById('fontSize').value, 10);
+        oCtx.font = `bold ${fontSize}px -apple-system, sans-serif`;
+        const textMetrics = oCtx.measureText(text);
+        const textWidth = textMetrics.width;
+        const textHeight = fontSize * 1.2;
+
+        const posX = (textOverlayPos.x / 100) * w;
+        const posY = (textOverlayPos.y / 100) * h;
+
+        if (pt.x >= posX - (textWidth / 2) && pt.x <= posX + (textWidth / 2) &&
+            pt.y >= posY - textHeight && pt.y <= posY + (textHeight / 2)) {
+          isDragging = true;
+          dragTarget = 'text';
+          document.getElementById('textPos').value = 'custom';
+          renderOverlay();
+          return;
+        }
+      }
+    }
+
+    function handlePointerMove(e) {
+      if (!isDragging || !baseImage || dragTarget === null) return;
+      e.preventDefault();
+      const pt = getCanvasCoordinates(e);
+      const w = overlayCanvas.width;
+      const h = overlayCanvas.height;
+
+      const pctX = Math.max(0, Math.min(100, (pt.x / w) * 100));
+      const pctY = Math.max(0, Math.min(100, (pt.y / h) * 100));
+
+      if (dragTarget === 'text') {
+        textOverlayPos.x = pctX;
+        textOverlayPos.y = pctY;
+      } else if (typeof dragTarget === 'number' && overlayImages[dragTarget]) {
+        overlayImages[dragTarget].x = pctX;
+        overlayImages[dragTarget].y = pctY;
+        
+        // Dynamic slider position UI update during drag
+        const card = document.querySelectorAll('.overlay-card')[dragTarget];
+        if (card) {
+          const sliders = card.querySelectorAll('input[type="range"]');
+          const labels = card.querySelectorAll('label');
+          if (sliders[2]) sliders[2].value = pctX;
+          if (sliders[3]) sliders[3].value = pctY;
+          if (labels[2]) labels[2].textContent = `X Position (${Math.round(pctX)}%)`;
+          if (labels[3]) labels[3].textContent = `Y Position (${Math.round(pctY)}%)`;
+        }
+      }
+
+      renderOverlay();
+    }
+
+    function handlePointerUp() {
+      isDragging = false;
+      dragTarget = null;
+    }
+
+    overlayCanvas.addEventListener('mousedown', handlePointerDown);
+    window.addEventListener('mousemove', handlePointerMove);
+    window.addEventListener('mouseup', handlePointerUp);
+
+    overlayCanvas.addEventListener('touchstart', handlePointerDown, { passive: false });
+    window.addEventListener('touchmove', handlePointerMove, { passive: false });
+    window.addEventListener('touchend', handlePointerUp);
+
+    // Speech to Text Integration
+    let recognition = null;
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        sttMicBtn.classList.add('recording');
+        sttMicBtn.textContent = '🛑 Listening...';
+      };
+
+      recognition.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        document.getElementById('overlayText').value = transcript;
+        renderOverlay();
+      };
+
+      recognition.onerror = (e) => {
+        alert('Speech recognition error: ' + e.error);
+        stopStt();
+      };
+
+      recognition.onend = () => stopStt();
+    } else {
+      sttMicBtn.disabled = true;
+      sttMicBtn.title = 'Speech Recognition not supported in this browser.';
+    }
+
+    function stopStt() {
+      sttMicBtn.classList.remove('recording');
+      sttMicBtn.textContent = '🎤 Mic';
+    }
+
+    sttMicBtn.addEventListener('click', () => {
+      if (!recognition) return;
+      if (sttMicBtn.classList.contains('recording')) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    });
+
+    // Main Renderer for Tab 2
+    function renderOverlay() {
+      if (!baseImage) return;
+
+      const w = overlayCanvas.width;
+      const h = overlayCanvas.height;
+      oCtx.clearRect(0, 0, w, h);
+
+      // 1. Draw Base Image
+      oCtx.drawImage(baseImage, 0, 0, w, h);
+
+      // 2. Draw Image Overlays / Watermarks
+      overlayImages.forEach((item, idx) => {
+        oCtx.save();
+        oCtx.globalAlpha = item.opacity / 100;
+        
+        const overlayWidth = (item.scale / 100) * w;
+        const overlayHeight = overlayWidth * (item.img.height / item.img.width);
+        
+        const posX = (item.x / 100) * w - (overlayWidth / 2);
+        const posY = (item.y / 100) * h - (overlayHeight / 2);
+
+        oCtx.drawImage(item.img, posX, posY, overlayWidth, overlayHeight);
+        oCtx.restore();
+
+        // Draw bounding selection outline for selected item
+        if (selectedOverlayIndex === idx) {
+          oCtx.save();
+          oCtx.strokeStyle = '#3b82f6';
+          oCtx.lineWidth = 3;
+          oCtx.setLineDash([6, 4]);
+          oCtx.strokeRect(posX - 2, posY - 2, overlayWidth + 4, overlayHeight + 4);
+          oCtx.restore();
+        }
+      });
+
+      // 3. Draw Text Overlay
+      const text = document.getElementById('overlayText').value.trim();
+      if (!text) return;
+
+      const fontSize = parseInt(document.getElementById('fontSize').value, 10);
+      const color = document.getElementById('textColor').value;
+      const pos = document.getElementById('textPos').value;
+      const shadow = document.getElementById('textShadow').checked;
+      const banner = document.getElementById('textBanner').checked;
+
+      oCtx.font = `bold ${fontSize}px -apple-system, sans-serif`;
+      oCtx.textAlign = 'center';
+
+      let yPos = (textOverlayPos.y / 100) * h;
+      let xPos = (textOverlayPos.x / 100) * w;
+
+      if (pos === 'bottom') {
+        yPos = h - (fontSize * 1.5);
+        xPos = w / 2;
+        textOverlayPos.x = 50; textOverlayPos.y = ((yPos / h) * 100);
+      } else if (pos === 'top') {
+        yPos = fontSize * 1.8;
+        xPos = w / 2;
+        textOverlayPos.x = 50; textOverlayPos.y = ((yPos / h) * 100);
+      } else if (pos === 'center') {
+        yPos = h / 2;
+        xPos = w / 2;
+        textOverlayPos.x = 50; textOverlayPos.y = 50;
+      }
+
+      // Draw Banner
+      if (banner) {
+        oCtx.save();
+        oCtx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        const bannerHeight = fontSize * 2;
+        oCtx.fillRect(0, yPos - (bannerHeight / 1.5), w, bannerHeight);
+        oCtx.restore();
+      }
+
+      // Draw Text Shadow / Glow
+      oCtx.save();
+      if (shadow) {
+        oCtx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        oCtx.shadowBlur = 10;
+        oCtx.shadowOffsetX = 2;
+        oCtx.shadowOffsetY = 2;
+      }
+
+      oCtx.fillStyle = color;
+      oCtx.fillText(text, xPos, yPos);
+      oCtx.restore();
+    }
+
+    ['overlayText', 'textColor', 'textPos', 'fontSize', 'textShadow', 'textBanner'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        if (id === 'fontSize') document.getElementById('fontSizeVal').textContent = document.getElementById('fontSize').value + 'px';
+        renderOverlay();
+      });
+    });
+
+    downloadOverlayBtn.addEventListener('click', () => {
+      if (!baseImage) return;
+      // Temporary deselect to render clean image without bounding boxes
+      const prevSel = selectedOverlayIndex;
+      selectedOverlayIndex = -1;
+      renderOverlay();
+
+      const a = document.createElement('a');
+      a.download = 'image-text-overlay.png';
+      a.href = overlayCanvas.toDataURL('image/png');
+      a.click();
+
+      selectedOverlayIndex = prevSel;
+      renderOverlay();
+    });
+
+    // --- TAB 3: MULTI-IMAGE JOINER & MANAGER ---
+    const joinerCanvas = document.getElementById('joinerCanvas');
+    const joinerEmptyState = document.getElementById('joinerEmptyState');
+    const jCtx = joinerCanvas.getContext('2d');
+    const imageListContainer = document.getElementById('imageList');
+    const downloadJoinBtn = document.getElementById('downloadJoin');
+    const clearJoinerBtn = document.getElementById('clearJoiner');
+    let joinerImages = [];
+    const MAX_JOINER_IMAGES = 20;
+
+    document.getElementById('imgJoinUpload').addEventListener('change', (e) => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+
+      if (joinerImages.length + files.length > MAX_JOINER_IMAGES) {
+        alert(`You can join up to ${MAX_JOINER_IMAGES} images at once.`);
+        e.target.value = '';
+        return;
+      }
+
+      files.forEach(file => {
+        if (!isValidImageFile(file)) return;
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          joinerImages.push({ id: Date.now() + Math.random(), name: file.name, img: img, src: objectUrl });
+          updateImageListUI();
+          renderJoiner();
+        };
+        img.onerror = () => {
+          alert(`Failed to load image file: ${file.name}`);
+          URL.revokeObjectURL(objectUrl);
+        };
+        img.src = objectUrl;
+      });
+      e.target.value = '';
+    });
+
+    function updateImageListUI() {
+      imageListContainer.innerHTML = '';
+      const hasImages = joinerImages.length > 0;
+      
+      downloadJoinBtn.disabled = !hasImages;
+      clearJoinerBtn.disabled = !hasImages;
+
+      if (!hasImages) {
+        imageListContainer.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:0.8rem; padding:12px;">No images added yet.</div>';
+        return;
+      }
+
+      joinerImages.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'image-item';
+        div.innerHTML = `
+          <div class="image-item-info">
+            <img src="${item.img.src}" alt="thumb">
+            <span><strong>#${idx + 1}</strong> ${escapeHtml(item.name)}</span>
+          </div>
+          <div class="image-item-actions">
+            <button class="btn-sec" onclick="moveJoinerItem(${idx}, -1)">▲</button>
+            <button class="btn-sec" onclick="moveJoinerItem(${idx}, 1)">▼</button>
+            <button class="btn-danger" onclick="removeJoinerItem(${idx})">✖</button>
+          </div>
+        `;
+        imageListContainer.appendChild(div);
+      });
+    }
+
+    function moveJoinerItem(index, direction) {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= joinerImages.length) return;
+      const temp = joinerImages[index];
+      joinerImages[index] = joinerImages[targetIndex];
+      joinerImages[targetIndex] = temp;
+      updateImageListUI();
+      renderJoiner();
+    }
+
+    function removeJoinerItem(index) {
+      const removed = joinerImages.splice(index, 1);
+      if (removed[0] && removed[0].src) URL.revokeObjectURL(removed[0].src);
+      updateImageListUI();
+      renderJoiner();
+    }
+
+    clearJoinerBtn.addEventListener('click', () => {
+      joinerImages.forEach(item => { if (item.src) URL.revokeObjectURL(item.src); });
+      joinerImages = [];
+      updateImageListUI();
+      renderJoiner();
+    });
+
+    document.getElementById('joinMode').addEventListener('change', renderJoiner);
+
+    function renderJoiner() {
+      const mode = document.getElementById('joinMode').value;
+
+      if (!joinerImages.length) {
+        joinerCanvas.width = 0; joinerCanvas.height = 0;
+        joinerCanvas.style.display = 'none';
+        joinerEmptyState.style.display = 'block';
+        return;
+      }
+
+      joinerEmptyState.style.display = 'none';
+      joinerCanvas.style.display = 'block';
+      const imgs = joinerImages.map(item => item.img);
+
+      if (mode === 'horizontal') {
+        const targetHeight = Math.max(...imgs.map(i => i.height));
+        const scaledWidths = imgs.map(i => i.width * (targetHeight / i.height));
+        const totalWidth = scaledWidths.reduce((a, b) => a + b, 0);
+
+        joinerCanvas.width = totalWidth;
+        joinerCanvas.height = targetHeight;
+
+        let currentX = 0;
+        imgs.forEach((img, idx) => {
+          const w = scaledWidths[idx];
+          jCtx.drawImage(img, currentX, 0, w, targetHeight);
+          currentX += w;
+        });
+      } else if (mode === 'vertical') {
+        const targetWidth = Math.max(...imgs.map(i => i.width));
+        const scaledHeights = imgs.map(i => i.height * (targetWidth / i.width));
+        const totalHeight = scaledHeights.reduce((a, b) => a + b, 0);
+
+        joinerCanvas.width = targetWidth;
+        joinerCanvas.height = totalHeight;
+
+        let currentY = 0;
+        imgs.forEach((img, idx) => {
+          const h = scaledHeights[idx];
+          jCtx.drawImage(img, 0, currentY, targetWidth, h);
+          currentY += h;
+        });
+      } else if (mode === 'grid') {
+        const cols = 2;
+        const targetWidth = 600;
+        const rows = Math.ceil(imgs.length / cols);
+
+        let cellHeights = [];
+        for (let r = 0; r < rows; r++) {
+          let rowImgs = imgs.slice(r * cols, r * cols + cols);
+          let maxHeight = Math.max(...rowImgs.map(i => i.height * (targetWidth / i.width)));
+          cellHeights.push(maxHeight);
+        }
+
+        const totalWidth = targetWidth * cols;
+        const totalHeight = cellHeights.reduce((a, b) => a + b, 0);
+
+        joinerCanvas.width = totalWidth;
+        joinerCanvas.height = totalHeight;
+
+        imgs.forEach((img, idx) => {
+          const col = idx % cols;
+          const row = Math.floor(idx / cols);
+          const x = col * targetWidth;
+          const y = cellHeights.slice(0, row).reduce((a, b) => a + b, 0);
+          const h = img.height * (targetWidth / img.width);
+          jCtx.drawImage(img, x, y, targetWidth, h);
+        });
+      }
+    }
+
+    downloadJoinBtn.addEventListener('click', () => {
+      if (!joinerImages.length) return;
+      const a = document.createElement('a'); a.download = 'joined-images.png';
+      a.href = joinerCanvas.toDataURL(); a.click();
+    });
+
+    // --- TAB 4: HIGH-QUALITY GIF ENGINE ---
+    let gifFrames = [];
+    let gifFrameUrls = [];
+    const createGifBtn = document.getElementById('createGif');
+    const MAX_GIF_FRAMES = 50;
+
+    document.getElementById('gifUpload').addEventListener('change', (e) => {
+      gifFrameUrls.forEach(url => URL.revokeObjectURL(url));
+      gifFrames = [];
+      gifFrameUrls = [];
+      createGifBtn.disabled = true;
+      
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+
+      if (files.length > MAX_GIF_FRAMES) {
+        alert(`You can upload a maximum of ${MAX_GIF_FRAMES} frames per GIF.`);
+        e.target.value = '';
+        return;
+      }
+
+      let loaded = 0;
+      files.forEach(file => {
+        if (!isValidImageFile(file)) return;
+        const objectUrl = URL.createObjectURL(file);
+        gifFrameUrls.push(objectUrl);
+        const img = new Image();
+        img.onload = () => {
+          gifFrames.push(img); loaded++;
+          if (loaded === files.length) {
+            document.getElementById('gifStatus').textContent = `${loaded} frames ready for encoding.`;
+            createGifBtn.disabled = loaded < 2;
+          }
+        };
+        img.onerror = () => {
+          alert(`Failed to parse frame: ${file.name}`);
+        };
+        img.src = objectUrl;
+      });
+    });
+
+    document.getElementById('gifDelay').addEventListener('input', (e) => {
+      document.getElementById('delayVal').textContent = e.target.value;
+    });
+
+    const getWorkerBlobUrl = () => {
+      const workerScript = `importScripts('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');`;
+      const blob = new Blob([workerScript], { type: 'application/javascript' });
+      return URL.createObjectURL(blob);
+    };
+
+    createGifBtn.addEventListener('click', () => {
+      if (gifFrames.length < 2) return;
+
+      const status = document.getElementById('gifStatus');
+      const progressBox = document.getElementById('progressBox');
+      const progressFill = document.getElementById('progressFill');
+
+      progressBox.style.display = 'block';
+      progressFill.style.width = '0%';
+      status.textContent = 'Processing frames...';
+      createGifBtn.disabled = true;
+
+      const delay = parseInt(document.getElementById('gifDelay').value, 10);
+      const maxDim = parseInt(document.getElementById('gifResize').value, 10);
+
+      const offCanvas = document.createElement('canvas');
+      const ctx = offCanvas.getContext('2d', { willReadFrequently: true });
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+
+      const firstImg = gifFrames[0];
+      let width = firstImg.width;
+      let height = firstImg.height;
+
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      offCanvas.width = width;
+      offCanvas.height = height;
+
+      const workerBlobUrl = getWorkerBlobUrl();
+      const gif = new GIF({
+        workers: 4,
+        quality: 2,
+        width: width,
+        height: height,
+        workerScript: workerBlobUrl
+      });
+
+      gifFrames.forEach(img => {
+        ctx.clearRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        gif.addFrame(ctx, { delay: delay, copy: true });
+      });
+
+      gif.on('progress', p => {
+        const pct = Math.round(p * 100);
+        progressFill.style.width = pct + '%';
+        status.textContent = `Encoding high-res GIF: ${pct}% complete...`;
+      });
+
+      gif.on('finished', (blob) => {
+        URL.revokeObjectURL(workerBlobUrl);
+        progressFill.style.width = '100%';
+        status.textContent = 'GIF rendered successfully!';
+        createGifBtn.disabled = false;
+        const resultUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.download = 'high-quality-animation.gif';
+        a.href = resultUrl;
+        a.click();
+        setTimeout(() => {
+          progressBox.style.display = 'none';
+          URL.revokeObjectURL(resultUrl);
+        }, 3000);
+      });
+
+      gif.render();
+    });
+
+    updateImageListUI();
+  </script>
+</body>
+</html>
